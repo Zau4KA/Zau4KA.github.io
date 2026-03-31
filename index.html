@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>З Днем Народження! 🎂</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ===== LOADING ===== */
+    #loading {
+      position: fixed; inset: 0;
+      background: #111;
+      z-index: 9999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      gap: 14px;
+      padding: 20px;
+    }
+    .cs2-logo {
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #f0a500;
+      text-shadow: 0 0 20px rgba(240,165,0,0.6);
+    }
+    .cs2-logo span { color: #fff; }
+    #load-subtitle { font-size: 0.8rem; color: #666; letter-spacing: 2px; }
+    #bar-wrap {
+      width: min(440px, 90vw); height: 6px;
+      background: #333;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    #bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #f0a500, #ffd700);
+      transition: width 0.08s linear;
+      border-radius: 3px;
+    }
+    #pct { font-size: 0.9rem; color: #f0a500; }
+    #load-status { font-size: 0.78rem; color: #888; min-height: 1.2em; text-align: center; }
+    .load-hint { font-size: 0.72rem; color: #444; margin-top: 6px; }
+
+    /* ===== MAIN ===== */
+    #main { display: none; min-height: 100vh; }
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 60px 20px 20px;
+    }
+    .cake-icon { font-size: 4rem; display: inline-block; animation: float 3s ease-in-out infinite; }
+    .birthday-title {
+      font-size: clamp(2.2rem, 9vw, 5.5rem);
+      font-weight: 900;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);
+      background-size: 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientFlow 4s linear infinite;
+      line-height: 1.15;
+    }
+    .badge {
+      display: inline-block;
+      background: #ff4757;
+      color: #fff;
+      padding: 7px 22px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 800;
+      margin: 14px 0 8px;
+      animation: pulse 1.8s ease infinite;
+    }
+    .subtitle { font-size: 1.15rem; color: #a0aec0; margin-top: 6px; }
+
+    /* ===== GLOBAL ELITE RANK ===== */
+    .rank-section {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center;
+      padding: 16px 20px 0;
+    }
+    .rank-badge {
+      background: linear-gradient(135deg, #1a1208, #2d1f00);
+      border: 2px solid #f0a500;
+      border-radius: 16px;
+      padding: 18px 36px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(240,165,0,0.25), inset 0 0 20px rgba(240,165,0,0.05);
+      animation: rankGlow 2.5s ease infinite;
+      min-width: 240px;
+    }
+    .rank-label {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: #888;
+      text-transform: uppercase;
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 6px;
+    }
+    .rank-stars { font-size: 1.1rem; letter-spacing: 4px; margin-bottom: 4px; }
+    .rank-name {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #f0a500;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(240,165,0,0.5);
+    }
+    .rank-sub { font-size: 0.8rem; color: #a07820; margin-top: 4px; }
+
+    /* ===== CARDS ===== */
+    .cards {
+      position: relative; z-index: 1;
+      max-width: 620px; margin: 24px auto 0;
+      padding: 0 20px 30px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 24px 28px;
+      transition: transform 0.3s;
+    }
+    .card:hover { transform: translateY(-3px); }
+    .card-icon { font-size: 2rem; margin-bottom: 8px; }
+    .card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .card p { color: #cbd5e0; line-height: 1.7; }
+
+    /* ===== JOKES CARD ===== */
+    .jokes-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 24px 28px;
+      text-align: center;
+    }
+    .jokes-card h3 { font-size: 1.1rem; margin-bottom: 16px; }
+    #joke-text {
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      line-height: 1.7;
+      min-height: 60px;
+      transition: opacity 0.3s;
+    }
+    .joke-nav {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; margin-top: 16px;
+    }
+    .joke-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Nunito', sans-serif;
+    }
+    .joke-btn:hover { background: rgba(255,255,255,0.2); }
+    #joke-counter { font-size: 0.8rem; color: #718096; }
+
+    /* ===== GAME ===== */
+    .game-header {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 10px 20px 30px;
+    }
+    .game-header h2 { font-size: 1.7rem; font-weight: 800; }
+    #counter { display: none; }
+
+    /* ===== FACEIT COUNTER ===== */
+    .faceit-display {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 12px;
+      margin: 18px auto 0;
+    }
+    .faceit-badge-wrap { text-align: center; }
+    .faceit-badge {
+      width: 96px; height: 96px;
+      display: block; margin: 0 auto;
+      transition: filter 0.4s ease, transform 0.25s;
+      image-rendering: -webkit-optimize-contrast;
+    }
+    .faceit-badge-label {
+      font-size: 0.62rem; letter-spacing: 3px;
+      color: #555; margin-top: 7px;
+      font-family: 'Share Tech Mono', monospace;
+      text-transform: uppercase;
+    }
+    .faceit-level-name {
+      font-size: 1.05rem; font-weight: 800;
+      color: #888;
+      transition: color 0.4s;
+      letter-spacing: 0.5px;
+    }
+    .faceit-hint {
+      font-size: 0.82rem; color: #556;
+      min-height: 1.2em;
+    }
+    #start-btn {
+      margin-top: 18px;
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      color: #fff; border: none;
+      padding: 16px 48px;
+      border-radius: 50px;
+      font-size: 1.2rem; font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: none;
+      animation: pulse 1.8s ease infinite;
+      box-shadow: 0 6px 30px rgba(255,107,107,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #start-btn:hover { transform: scale(1.07); box-shadow: 0 10px 40px rgba(255,107,107,0.6); }
+    /* 10 small hexagon dots */
+    .faceit-dots {
+      display: flex; gap: 7px; align-items: center;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .faceit-dot {
+      width: 30px; height: 30px;
+      transition: opacity 0.3s ease, transform 0.25s;
+      display: block;
+    }
+    .faceit-dot.current { transform: scale(1.35); z-index: 1; }
+    /* pulse on new level */
+    @keyframes levelUp {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.55); }
+      70%  { transform: scale(0.95); }
+      100% { transform: scale(1.35); }
+    }
+    .faceit-dot.pop { animation: levelUp 0.4s ease forwards; }
+    .divider {
+      max-width: 620px; margin: 10px auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+
+    /* ===== POT ===== */
+    #pot {
+      position: fixed; z-index: 200;
+      cursor: default; user-select: none;
+      transition: left 0.28s cubic-bezier(.25,.46,.45,.94), top 0.28s cubic-bezier(.25,.46,.45,.94);
+      text-align: center;
+    }
+    /*
+      ЯК ДОДАТИ ФОТО:
+      Замініть <span id="pot-face"> на:
+      <img src="friend.jpg" alt="" style="width:130px;height:130px;border-radius:50%;border:4px solid #feca57;object-fit:cover;display:block;">
+    */
+    #pot-face { font-size: 90px; line-height: 1; display: block; }
+    #pot.catchable #pot-face { animation: glow 0.9s ease infinite; }
+    #pot-label { font-size: 0.75rem; color: #feca57; font-weight: 700; display: none; margin-top: 4px; }
+    #pot.catchable { cursor: grab; }
+    #pot.catchable #pot-label { display: block; }
+
+    /* ===== PRANK BUTTON ===== */
+    .prank-wrap { position: relative; height: 70px; overflow: hidden; }
+    #prank-btn {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      color: #fff; border: none;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-size: 1.05rem; font-weight: 800;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      white-space: nowrap;
+      transition: left 0.15s ease;
+    }
+    #prank-reveal { display: none; color: #feca57; font-weight: 700; text-align: center; font-size: 1rem; }
+
+    /* ===== WISHES ===== */
+    .wishes-card {
+      max-width: 620px; margin: 0 auto 60px;
+      padding: 0 20px;
+      position: relative; z-index: 1;
+    }
+    .wishes-card .card {
+      text-align: center;
+      background: rgba(255,107,107,0.08);
+      border-color: rgba(255,107,107,0.25);
+    }
+    .wishes-card .card p { font-size: 1.15rem; line-height: 1.9; }
+
+    /* ===== BALLOONS ===== */
+    .balloon {
+      position: fixed; bottom: -120px;
+      font-size: 3.5rem; z-index: 0;
+      pointer-events: none;
+      animation: riseUp linear infinite;
+    }
+
+    /* ===== GIFT OVERLAY ===== */
+    #gift-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #gift-overlay.open { display: flex; }
+    .gift-box {
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      border-radius: 24px; padding: 48px 44px;
+      text-align: center; max-width: 380px;
+      animation: popIn 0.4s ease;
+    }
+    .gift-box .gift-icon { font-size: 4rem; margin-bottom: 10px; }
+    .gift-box h2 { font-size: 1.8rem; margin-bottom: 10px; }
+    .gift-box p { color: rgba(255,255,255,0.9); font-size: 1rem; margin-bottom: 20px; }
+    .gift-open-btn {
+      display: inline-block; background: #fff; color: #ff4757;
+      padding: 14px 38px; border-radius: 50px;
+      font-size: 1.1rem; font-weight: 900;
+      text-decoration: none; transition: transform 0.2s;
+    }
+    .gift-open-btn:hover { transform: scale(1.08); }
+    .gift-close {
+      display: block; margin-top: 16px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer; font-size: 0.9rem;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    /* ===== VIRUS TOAST ===== */
+    #virus-toast {
+      position: fixed; bottom: -160px; right: 20px;
+      background: #c0392b; color: #fff;
+      padding: 16px 20px; border-radius: 12px;
+      z-index: 500; max-width: 280px;
+      font-size: 0.9rem;
+      transition: bottom 0.5s ease;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    #virus-toast.show { bottom: 20px; }
+    #virus-toast strong { display: block; margin-bottom: 6px; font-size: 1rem; }
+
+    /* ===== KEYFRAMES ===== */
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+    @keyframes glow {
+      0%,100% { filter: drop-shadow(0 0 8px #feca57); }
+      50% { filter: drop-shadow(0 0 28px #feca57) drop-shadow(0 0 50px #ff6b6b); }
+    }
+    @keyframes rankGlow {
+      0%,100% { box-shadow: 0 0 20px rgba(240,165,0,0.2), inset 0 0 20px rgba(240,165,0,0.03); }
+      50% { box-shadow: 0 0 40px rgba(240,165,0,0.45), inset 0 0 30px rgba(240,165,0,0.08); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.4); opacity: 0; }
+      75% { transform: scale(1.06); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%,100% { transform: rotate(0deg); }
+      25% { transform: rotate(-12deg); }
+      75% { transform: rotate(12deg); }
+    }
+    @keyframes riseUp {
+      0%   { opacity: 0.8; }
+      25%  { transform: translateX(20px) rotate(5deg); }
+      50%  { transform: translateX(-15px) rotate(-4deg); }
+      75%  { transform: translateX(10px) rotate(3deg); }
+      100% { opacity: 0; bottom: 110vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div id="loading">
+  <div class="cs2-logo" id="load-title">COUNTER-<span>STRIKE</span> 2</div>
+  <div id="load-subtitle">BUILD 2026.04.01 — BIRTHDAY EDITION</div>
+  <div id="bar-wrap"><div id="bar"></div></div>
+  <div id="pct">0%</div>
+  <div id="load-status">Connecting to servers...</div>
+  <div class="load-hint" id="load-hint">натисни F для оплати поваги</div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div id="main">
+  <canvas id="stars"></canvas>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="cake-icon" id="hero-icon">🎂</div>
+    <h1 class="birthday-title" id="hero-title">З Днем<br>Народження!</h1>
+    <div class="badge" id="hero-badge">🃏 І з Першим Квітня! 🃏</div>
+    <p class="subtitle" id="hero-subtitle">Сьогодні ти — іменинник і головний дурень дня&nbsp;😄</p>
+  </section>
+
+  <!-- Global Elite Rank -->
+  <div class="rank-section">
+    <div class="rank-badge">
+      <div class="rank-label" id="rank-label">Офіційний CS2 Ранг Іменинника</div>
+      <div class="rank-stars" id="rank-stars">★ ★ ★ ★ ★</div>
+      <div class="rank-name" id="rank-name">Global Elite</div>
+      <div class="rank-sub" id="rank-sub">Топ 0.75% — але лише в каструлях</div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards" style="margin-top:28px">
+
+    <!-- Fact card -->
+    <div class="card">
+      <div class="card-icon" id="fact-icon">🎭</div>
+      <h3 id="fact-title">Факт про твій день народження:</h3>
+      <p id="fact-text">Народитись 1 квітня — це найкраща відмовка в житті.<br>
+      «Я серйозно кажу!» — «Ага, звісно, перше квітня...» 😅</p>
+    </div>
+
+    <!-- IQ card -->
+    <div class="card">
+      <div class="card-icon" id="iq-icon">🥘</div>
+      <h3 id="iq-title">Тест на IQ (обов'язковий):</h3>
+      <p id="iq-text">Злови каструлю нижче&nbsp;— і отримаєш подарунок.<br>
+      <small style="opacity:.65">Але вона не дасться просто так…</small></p>
+    </div>
+
+    <!-- Jokes card -->
+    <div class="jokes-card">
+      <div class="card-icon">😂</div>
+      <h3 id="jokes-title">Тупі жарти (безкоштовно)</h3>
+      <div id="joke-text">Завантаження жарту...</div>
+      <div class="joke-nav">
+        <button class="joke-btn" id="joke-prev">◀</button>
+        <span id="joke-counter">1 / 1</span>
+        <button class="joke-btn" id="joke-next">▶</button>
+      </div>
+    </div>
+
+    <!-- Prank button card -->
+    <div class="card">
+      <div class="card-icon" id="prank-icon">🎁</div>
+      <h3 id="prank-title">Хочеш подарунок прямо зараз?</h3>
+      <div class="prank-wrap" style="margin-top:12px">
+        <button id="prank-btn">Натисни мене!</button>
+      </div>
+      <p id="prank-reveal" style="margin-top:10px">
+        🃏 1 квітня — жодних подарунків без бою! Злови каструлю!
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Game header -->
+  <div class="divider" style="margin-top:24px"></div>
+  <div class="game-header">
+    <h2 id="game-title">🏃 Злови каструлю! 🏃</h2>
+    <div class="faceit-display">
+      <div class="faceit-badge-wrap">
+        <img class="faceit-badge" id="faceit-badge" src="" alt="Faceit Level" width="96" height="96">
+        <div class="faceit-badge-label">FACEIT LEVEL</div>
+      </div>
+      <div class="faceit-level-name" id="faceit-name">Ще не почав</div>
+      <div class="faceit-dots" id="faceit-dots"></div>
+      <div class="faceit-hint" id="faceit-hint">Наводь мишку на каструлю щоб підняти рівень</div>
+      <button id="start-btn">🦀 Почати полювання!</button>
+    </div>
+    <div id="counter"></div>
+  </div>
+
+  <!-- Wishes -->
+  <div class="wishes-card">
+    <div class="card">
+      <div class="card-icon" id="wishes-icon" style="font-size:2.5rem">❤️</div>
+      <h3 id="wishes-title" style="font-size:1.3rem; margin-bottom:12px">Але якщо серйозно…</h3>
+      <p id="wishes-text">З Днем Народження, друже! 🎉<br>
+      Бажаю щастя, здоров'я та натхнення.<br>
+      А каструля на голові — це просто твій стиль&nbsp;🥘✨</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; color:#4a5568; font-size:0.85rem; padding-bottom:40px; position:relative; z-index:1">
+    <span id="footer-text">Зроблено з ❤️ та щіпкою першоквітневого безумства</span>
+  </div>
+</div>
+
+<!-- ===== POT ===== -->
+<div id="pot">
+  <img id="pot-face" src="friend.jpg" alt="" style="width:130px;height:130px;border-radius:50%;border:4px solid #feca57;object-fit:cover;display:block;">
+  <div id="pot-label">Клікни!</div>
+</div>
+
+<!-- ===== GIFT OVERLAY ===== -->
+<div id="gift-overlay">
+  <div class="gift-box">
+    <div class="gift-icon" id="gift-icon">🎁</div>
+    <h2 id="gift-title">Зловив! 🥘🎉</h2>
+    <p id="gift-text">Твій подарунок тут!<br><small style="opacity:.8">Підказка: це не каструля 😄</small></p>
+    <a id="gift-btn" href="card.pdf" target="_blank" class="gift-open-btn">🎫 Відкрити подарунок!</a>
+    <button class="gift-close" onclick="document.getElementById('gift-overlay').classList.remove('open')" id="gift-close">закрити</button>
+  </div>
+</div>
+
+<!-- ===== VIRUS TOAST ===== -->
+<div id="virus-toast">
+  <strong id="virus-title">⚠️ ПОПЕРЕДЖЕННЯ VAC</strong>
+  <span id="virus-msg">Виявлено підозрілий скін каструлі на сторінці!</span>
+  <div id="virus-hint" style="font-size:0.75rem; margin-top:6px; opacity:.7">Зловіть каструлю, щоб уникнути бану</div>
+</div>
+
+<script>
+const T = {
+
+  pageTitle: [
+    'З Днем Народження! 🎂',
+    'З Першим Квітня!',
+    'GG WP!',
+    'Заєць ну ти руїна',
+    'БРАТАН ПАДВІГАЙСЯ',
+    'НУУУ ЗА ЯЩІКОМ',
+  ],
+
+  loading: {
+    title:    'COUNTER-<span>STRIKE</span> 2',
+    subtitle: 'BUILD 2026.04.01',
+    hint:     'Заєць (не) лох',
+    steps: [
+      [ 5,  'Під\'єдную до серверів CS2...'],
+      [15,  'Качаєм мапу de_birthday...'],
+      [28,  'Скануємо Зайця через VAC...'],
+      [42,  'Пробуємо виписати бан...'],
+      [55,  'Бан не вийшло виписати, шукаєм гру... (ETA: 47 хв)'],
+      [68,  'Покращуємо аім зайця...'],
+      [78,  'Не вдалось покращити аім, як був .... так і лишився ...'],
+      [88,  'Реконект... (кікнули за те що сів на булку)'],
+      [95,  'Майже...'],
+      [99,  'Патч на місці...'],
+    ],
+    stuckMsg:   '99%... З твоїм інтернетом то надовго',
+    jokeReveal: 'З Першим Квітня! ІДИ ПОКАКАЙ ПОКИ ВОНО ГРУЗИТЬ З ТИМ ІНТЕРНЕТОМ!',
+  },
+
+  hero: {
+    icon:     '🎂',
+    title:    'З Днем<br>Народження!',
+    badge:    'З Першим Квітня також!',
+    subtitle: 'Ти — головний дурень ну і ше іменинник, вітаємо!',
+  },
+
+  rank: {
+    label: 'Шо ти там в кс набив',
+    stars: '★ ★ ★ ★ ★',
+    name:  'Global Elite',
+    sub:   'Топ 0.01% — але на 2 лвл фасіка',
+  },
+
+  factCard: {
+    icon:  '->',
+    title: 'Факт про твій день народження:',
+    text:  'Народитись 1 квітня — це Заєць стайл.<br> Хай на цей дн ти не станеш дурнішим!',
+  },
+
+  iqCard: {
+    icon:  '<->',
+    title: 'Тест на IQ:',
+    text:  'Спіймай каструлю',
+  },
+
+  jokes: [
+    'Краще 5 см спереді ніж 20 ззаду. Думаю зайцю таке підійде',
+    'Якщо дружина робить тебе щасливим, то яка різниця чия це дружина',
+    'Краще забрати сина з мавп\'ятника ніж дочку з сауни',
+    'Не важливо в якій жопі ти знаходишся, головне - щоб нікого в твоїй',
+    'Суіцидніки дивні люди - чим більше їх - тим їх менше',
+    'Вчора взнав що в косооких - дві точки зору',
+    'Вчора сміявся з дідом до смерті, дід - переміг',
+    'Воздух не чуствується поки його не іспортіть',
+    'Краще пьорднуть як мєдвєдь чєм всю жизнь як гусь шипєть',
+    'Вчора проходив флюрографію, дійшов до боса',
+    'Мені двічі повторювати не треба - і з першого байдуже',
+    'Артем ну ше треба якісь анєгдоти!',
+    'Шол какта заєц па масту - упал - разбілся',
+    'Шеф я устал, це анєкдот? ДА!',
+    'Шось там про умниє мислі які не на того напали, лінь писати',
+    'Я шось там велосипед, впадло, короче  хі хі ха ха',
+    'Все подорожчало, квартплата, бензин, добре шо зп не підняли'
+  ],
+
+  jokesTitle: 'Розривні мега супер смішні жарти (2 злотих за кожен)',
+
+  prankCard: {
+    icon:    '🎁',
+    title:   'Хочеш мільйон баків?',
+    btnText: 'Натисни мене!',
+    reveal:  'З першим квітня....',
+  },
+
+  game: {
+    title:      'Злови каструлю!',
+    counter:    n  => `Твій левел фасіка: <strong>${n}</strong>`,
+    catchable:  '<strong>Піймай її! Клікни!</strong>',
+    caught:     '🥳 Зловив! Відкривай подарунок!',
+    potEmoji:   '🥘',
+    potLabel:   'Клікни',
+    startBtn:   '🦀 Почати полювання!',
+    totalHovers: 10,
+
+    levelIcons: (function(){
+      const svgs = [
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.685 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.563-1.823z" fill="#CDCDCD" fill-opacity=".1"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.685 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.563-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.894 15.816L3.858 17.09a9.656 9.656 0 0 0 1.894 2.2l1.562-1.822a7.206 7.206 0 0 1-1.42-1.65z" fill="#EEE"/><path d="M11.765 10.233l-1.487.824v-1.034L12 8.948h.991V14.4h-1.226v-4.167z" fill="#EEE"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.685 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.563-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.257 14.53l-2.249.842a9.613 9.613 0 0 0 2.743 3.917l1.563-1.822a7.206 7.206 0 0 1-2.057-2.938z" fill="#1CE400"/><path d="M10.05 13.157c0-.303.084-.566.252-.79a1.6 1.6 0 0 1 .655-.512 8.17 8.17 0 0 1 .748-.286 2.78 2.78 0 0 0 .663-.302c.157-.107.235-.233.235-.378v-.698c0-.173-.07-.288-.21-.344-.15-.062-.386-.092-.705-.092-.387 0-.896.07-1.529.21V9.04a8.523 8.523 0 0 1 1.756-.177c.66 0 1.15.101 1.47.303.324.201.487.537.487 1.008v.756c0 .285-.087.534-.26.747a1.567 1.567 0 0 1-.656.47c-.252.107-.51.202-.773.286a2.65 2.65 0 0 0-.68.336c-.162.123-.244.27-.244.437v.277h2.621v.916h-3.83v-1.243z" fill="#1CE400"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2.4 12a9.58 9.58 0 0 0 3.352 7.29l1.562-1.823A7.184 7.184 0 0 1 4.801 12H2.4z" fill="#1CE400"/><path d="M11.79 14.484c-.47 0-1.08-.042-1.831-.126v-.975l.269.05c.106.023.165.037.176.043l.286.05c.067.011.21.028.428.05.168.017.339.026.513.026.324 0 .548-.04.672-.118.128-.078.193-.227.193-.445v-.63c0-.263-.283-.395-.849-.395h-.99v-.84h.99c.437 0 .656-.16.656-.479v-.529a.453.453 0 0 0-.068-.269c-.044-.067-.126-.114-.243-.142a2.239 2.239 0 0 0-.504-.042c-.32 0-.812.033-1.479.1V8.94c.762-.05 1.3-.076 1.613-.076.683 0 1.176.079 1.479.235.308.157.462.434.462.832v.899a.62.62 0 0 1-.152.42.703.703 0 0 1-.37.227c.494.173.74.445.74.814v.89c0 .466-.16.799-.479 1-.319.202-.823.303-1.512.303z" fill="#1CE400"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.91 6.91L5.211 5.211A9.57 9.57 0 0 0 2.4 12a9.58 9.58 0 0 0 3.352 7.289l1.562-1.822A7.184 7.184 0 0 1 4.801 12c0-1.988.805-3.788 2.108-5.09z" fill="#FFC800"/><path d="M12.303 13.3h-2.52v-.967l2.243-3.385h1.386v3.47H14v.881h-.588v1.1h-1.109v-1.1zm0-.883v-2.31l-1.47 2.31h1.47z" fill="#FFC800"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.4A9.6 9.6 0 0 0 2.4 12a9.58 9.58 0 0 0 3.352 7.29l1.562-1.823A7.2 7.2 0 0 1 12 4.8V2.4z" fill="#FFC800"/><path d="M11.815 14.484c-.386 0-.966-.031-1.739-.093v-1.016c.695.129 1.218.193 1.571.193.308 0 .532-.033.672-.1a.357.357 0 0 0 .21-.337v-.814c0-.152-.05-.258-.151-.32-.101-.067-.266-.1-.496-.1h-1.68V8.948h3.444v.941H11.43v1.109h.856c.325 0 .642.061.95.185a.909.909 0 0 1 .554.865v1.142c0 .219-.042.415-.126.588-.084.168-.19.297-.32.387a1.315 1.315 0 0 1-.453.201c-.185.05-.364.084-.537.101a10.05 10.05 0 0 1-.538.017z" fill="#FFC800"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M15.816 5.895a7.2 7.2 0 0 0-8.502 11.572l-1.562 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4c1.87 0 3.613.535 5.089 1.458l-1.273 2.037z" fill="#FFC800"/><path d="M11.992 14.484a5.99 5.99 0 0 1-.613-.025 2.48 2.48 0 0 1-.496-.11 1.24 1.24 0 0 1-.453-.243 1.184 1.184 0 0 1-.286-.437 1.89 1.89 0 0 1-.118-.689v-2.537c0-.268.045-.506.135-.714.095-.212.215-.375.361-.487.123-.095.288-.173.496-.235a2.71 2.71 0 0 1 .604-.126c.213-.011.406-.017.58-.017.24 0 .745.028 1.512.084v.9c-.756-.09-1.296-.135-1.621-.135-.269 0-.46.014-.571.042-.112.028-.188.084-.227.168-.034.078-.05.22-.05.428v.647h.898c.303 0 .521.005.655.017.135.005.286.03.454.075.18.045.31.11.395.193.09.079.168.2.235.362.062.168.092.366.092.596v.74c0 .257-.039.484-.117.68-.079.19-.18.338-.303.445-.112.1-.26.182-.445.243a2.04 2.04 0 0 1-.537.11 5.58 5.58 0 0 1-.58.025zm.017-.815c.246 0 .417-.014.512-.042.101-.028.165-.081.193-.16a1.51 1.51 0 0 0 .042-.428v-.79c0-.134-.016-.23-.05-.285-.034-.062-.104-.104-.21-.126a2.557 2.557 0 0 0-.496-.034h-.756v1.243c0 .19.014.328.042.412.034.084.101.14.202.168.106.028.28.042.52.042z" fill="#FFC800"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M17.934 7.92a7.2 7.2 0 1 0-10.62 9.546L5.752 19.29A9.58 9.58 0 0 1 2.4 12a9.6 9.6 0 0 1 17.512-5.44l-1.978 1.36z" fill="#FFC800"/><path d="M12.546 9.906H9.9v-.958h4v.84L11.807 14.4h-1.36l2.1-4.494z" fill="#FFC800"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M19.2 12h2.4A9.6 9.6 0 0 0 12 2.4 9.6 9.6 0 0 0 2.4 12a9.58 9.58 0 0 0 3.352 7.29l1.562-1.823A7.2 7.2 0 1 1 19.2 12z" fill="#FF6309"/><path d="M12 14.484c-.723 0-1.252-.09-1.588-.269-.33-.18-.496-.49-.496-.932v-.941c0-.18.09-.347.269-.504.179-.157.392-.263.638-.32v-.033a.879.879 0 0 1-.504-.235.614.614 0 0 1-.218-.462v-.781c0-.392.143-.68.428-.866.291-.184.781-.277 1.47-.277s1.176.093 1.462.277c.291.185.437.474.437.866v.78a.614.614 0 0 1-.219.463.879.879 0 0 1-.504.235v.034c.247.056.46.162.639.319s.268.325.268.504v.94c0 .454-.17.768-.512.941-.342.174-.865.26-1.57.26zm0-3.293c.246 0 .416-.034.512-.1.1-.074.15-.188.15-.345v-.63c0-.163-.05-.277-.15-.345-.096-.072-.266-.109-.513-.109-.246 0-.42.037-.52.11-.096.067-.143.181-.143.344v.63a.41.41 0 0 0 .142.336c.09.073.264.11.521.11zm0 2.495c.24 0 .414-.014.52-.042.112-.028.185-.076.218-.143.04-.067.06-.174.06-.32v-.738c0-.163-.048-.283-.144-.362-.095-.072-.31-.109-.646-.109-.32 0-.535.037-.647.11-.107.067-.16.187-.16.36v.74c0 .145.017.252.05.32.04.066.113.114.219.142.112.028.288.042.53.042z" fill="#FF6309"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.517 15.066a7.2 7.2 0 1 0-11.202 2.4L5.751 19.29A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.563 9.563 0 0 1-.91 4.089l-2.173-1.023z" fill="#FF6309"/><path d="M11.84 14.484c-.48 0-.999-.028-1.553-.084v-.874c.717.079 1.229.118 1.537.118.286 0 .493-.02.622-.059.128-.04.212-.112.252-.218.044-.107.067-.275.067-.504v-.513h-.907c-.303 0-.521-.003-.656-.008a2.63 2.63 0 0 1-.453-.084.898.898 0 0 1-.395-.193 1.052 1.052 0 0 1-.235-.37 1.706 1.706 0 0 1-.093-.588v-.74c0-.257.04-.48.118-.671.078-.196.18-.35.302-.462.112-.095.258-.174.437-.235.185-.062.367-.101.546-.118.213-.011.406-.017.58-.017.263 0 .47.009.621.025.157.012.322.045.496.101a1.129 1.129 0 0 1 .74.689 1.9 1.9 0 0 1 .117.689v2.537c0 .565-.171.971-.513 1.218-.336.24-.879.36-1.63.36zm.925-2.949V10.26c0-.19-.017-.322-.05-.395-.029-.073-.093-.12-.194-.143a2.73 2.73 0 0 0-.529-.034 2.11 2.11 0 0 0-.504.042.26.26 0 0 0-.193.152c-.034.072-.05.198-.05.378v.831c0 .135.016.233.05.294.033.056.1.095.201.118a2.7 2.7 0 0 0 .504.033h.765z" fill="#FF6309"/></svg>`,
+        `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1F1F22"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#CDCDCD" fill-opacity=".1"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16.686 17.467a7.2 7.2 0 1 0-9.371 0l-1.563 1.822A9.58 9.58 0 0 1 2.4 12 9.6 9.6 0 0 1 12 2.4a9.6 9.6 0 0 1 9.6 9.6 9.58 9.58 0 0 1-3.352 7.29l-1.562-1.823z" fill="#FE1F00"/><path d="M9.233 10.233l-1.487.824v-1.034l1.722-1.075h.991V14.4H9.233v-4.167zm4.595 4.251c-.246 0-.448-.009-.604-.025a3.295 3.295 0 0 1-.513-.101 1.237 1.237 0 0 1-.462-.235 1.202 1.202 0 0 1-.294-.454 1.7 1.7 0 0 1-.126-.689v-2.612c0-.258.04-.485.118-.68a1.23 1.23 0 0 1 .302-.463c.107-.095.252-.17.437-.226a2.45 2.45 0 0 1 .554-.118c.213-.011.41-.017.588-.017.252 0 .454.009.605.025a2.4 2.4 0 0 1 .504.101c.202.062.361.143.479.244.118.1.218.246.302.437.084.19.126.422.126.697v2.612c0 .258-.042.485-.126.68a1.15 1.15 0 0 1-.302.454 1.32 1.32 0 0 1-.462.235c-.19.062-.372.098-.546.11a5.58 5.58 0 0 1-.58.025zm.017-.79c.235 0 .403-.014.504-.042a.306.306 0 0 0 .202-.176c.033-.084.05-.221.05-.412v-2.78c0-.19-.017-.328-.05-.412a.282.282 0 0 0-.202-.168c-.1-.033-.269-.05-.504-.05-.24 0-.414.017-.52.05a.282.282 0 0 0-.202.168c-.034.084-.05.221-.05.412v2.78c0 .19.016.328.05.412.033.084.1.143.201.176.107.028.28.042.521.042z" fill="#FE1F00"/></svg>`,
+      ];
+      return svgs.map(s => 'data:image/svg+xml,' + encodeURIComponent(s));
+    })(),
+
+    levelNames: [
+      'Ще не почав',
+      'Це шо за лвл',
+      'Тебе тут дірібанять?',
+      'Дефолт плеєр',
+      'Вище дна',
+      'Ну таке шось',
+      'Дігл плеєр',
+      'Майстер інста-смоків',
+      'Грандмастер розкиду',
+      'Легендарний пітух',
+      'Глобал',
+    ],
+    levelColors: [
+      '#2a2a3a',
+      '#AAAAAA',
+      '#1CE400',
+      '#1CE400',
+      '#FFC800',
+      '#FFC800',
+      '#FF6328',
+      '#FF6328',
+      '#FE0000',
+      '#FE0000',
+      '#FE0000',
+    ],
+    levelHints: [
+      'Наводь мишку на каструлю щоб підняти рівень',
+      'Ще 9 наведень до фіналу',
+      'Ще 8 наведень до фіналу',
+      'Ще 7 наведень до фіналу',
+      'Ще 6 наведень до фіналу',
+      'Ще 5 наведень до фіналу',
+      'Ще 4 наведень до фіналу',
+      'Ще 3 наведень до фіналу',
+      'Ще 2 наведень до фіналу',
+      'Ще 1 наведення до фіналу...',
+      'КЛІКНИ',
+    ],
+  },
+
+  gift: {
+    icon:     '🎁',
+    title:    'Зловив! 🎉',
+    text:     'Твій подарунок тут!<br><small style="opacity:.8">Підказка: це не каструля 😄</small>',
+    btnText:  'Відкрити подарунок!',
+    pdfFile:  'card.pdf',
+    closeBtn: 'закрити',
+  },
+
+  wishes: {
+    icon:  '❤️',
+    title: 'Короче…',
+    text:  'З Днем Народження, дорогий друже! 🎉<br>Бажаєм щастя, здоров\'я та натхнення.<br>Нехай тобі якось пощастить і ти не застрягнеш в болоті',
+  },
+
+  virusToast: {
+    title:   '⚠️ VAC',
+    initial: 'Виявлено лоу скіл!',
+    joke:    'Нажаль це не фікситься',
+    hint:    'Нада больше трєніраватся',
+  },
+
+  footer: 'Допоможіть, булка мене б\'є',
+};
+
+
+function applyTexts() {
+  const s = T;
+  // Loading
+  document.getElementById('load-title').innerHTML   = s.loading.title;
+  document.getElementById('load-subtitle').textContent = s.loading.subtitle;
+  document.getElementById('load-hint').textContent  = s.loading.hint;
+  // Hero
+  document.getElementById('hero-icon').textContent  = s.hero.icon;
+  document.getElementById('hero-title').innerHTML   = s.hero.title;
+  document.getElementById('hero-badge').textContent = s.hero.badge;
+  document.getElementById('hero-subtitle').innerHTML = s.hero.subtitle;
+  // Rank
+  document.getElementById('rank-label').textContent = s.rank.label;
+  document.getElementById('rank-stars').textContent = s.rank.stars;
+  document.getElementById('rank-name').textContent  = s.rank.name;
+  document.getElementById('rank-sub').textContent   = s.rank.sub;
+  // Cards
+  document.getElementById('fact-icon').textContent  = s.factCard.icon;
+  document.getElementById('fact-title').textContent = s.factCard.title;
+  document.getElementById('fact-text').innerHTML    = s.factCard.text;
+  document.getElementById('iq-icon').textContent    = s.iqCard.icon;
+  document.getElementById('iq-title').textContent   = s.iqCard.title;
+  document.getElementById('iq-text').innerHTML      = s.iqCard.text;
+  document.getElementById('jokes-title').textContent = s.jokesTitle;
+  document.getElementById('prank-icon').textContent = s.prankCard.icon;
+  document.getElementById('prank-title').textContent = s.prankCard.title;
+  document.getElementById('prank-btn').textContent  = s.prankCard.btnText;
+  document.getElementById('prank-reveal').textContent = s.prankCard.reveal;
+  // Game
+  document.getElementById('game-title').textContent = s.game.title;
+  document.getElementById('pot-face').textContent   = s.game.potEmoji;
+  document.getElementById('pot-label').textContent  = s.game.potLabel;
+  document.getElementById('start-btn').textContent  = s.game.startBtn;
+  // Gift
+  document.getElementById('gift-icon').textContent  = s.gift.icon;
+  document.getElementById('gift-title').textContent = s.gift.title;
+  document.getElementById('gift-text').innerHTML    = s.gift.text;
+  document.getElementById('gift-btn').textContent   = s.gift.btnText;
+  document.getElementById('gift-btn').href          = s.gift.pdfFile;
+  document.getElementById('gift-close').textContent = s.gift.closeBtn;
+  // Wishes
+  document.getElementById('wishes-icon').textContent  = s.wishes.icon;
+  document.getElementById('wishes-title').textContent = s.wishes.title;
+  document.getElementById('wishes-text').innerHTML    = s.wishes.text;
+  // Toast
+  document.getElementById('virus-title').textContent = s.virusToast.title;
+  document.getElementById('virus-msg').textContent   = s.virusToast.initial;
+  document.getElementById('virus-hint').textContent  = s.virusToast.hint;
+  // Footer
+  document.getElementById('footer-text').textContent = s.footer;
+}
+applyTexts();
+initClawCursor();
+
+function initClawCursor() {
+  // Клешня рака — game-icons.net by Lorc, CC BY 3.0
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="42" height="42"><path fill="#FF4500" d="m175.656 22.375-48.47 82.094c-23.017 4.384-43.547 11.782-60.124 22.374-24.436 15.613-40.572 37.414-45.5 67.875-4.79 29.62 1.568 68.087 24.125 116.093 93.162 22.88 184.08-10.908 257.25-18.813 37.138-4.012 71.196-.898 96.344 22.97 22.33 21.19 36.21 56.808 41.908 113.436 29.246-35.682 44.538-69.065 49.343-99.594 5.543-35.207-2.526-66.97-20.31-95.593-8.52-13.708-19.368-26.618-32-38.626l14.217-33-41.218 10.625c-8.637-6.278-17.765-12.217-27.314-17.782l-7.03-59.782-38.157 37.406a423.505 423.505 0 0 0-38.158-13.812l-8.375-71.28-57.625 56.5c-9.344-1.316-18.625-2.333-27.812-2.97l-31.094-78.125zM222 325.345c-39.146 7.525-82.183 14.312-127.156 11.686 47.403 113.454 207.056 224.082 260.125 87-101.18 33.84-95.303-49.595-132.97-98.686z"/></svg>`;
+  const url = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  const style = document.createElement('style');
+  // hotspot (5,5) — кінчик верхньої щелепи
+  style.textContent = `* { cursor: url("${url}") 5 5, auto !important; }`;
+  document.head.appendChild(style);
+}
+
+(function () {
+  const bar    = document.getElementById('bar');
+  const pct    = document.getElementById('pct');
+  const status = document.getElementById('load-status');
+  const screen = document.getElementById('loading');
+  const main   = document.getElementById('main');
+  const steps  = T.loading.steps;
+  let p = 0, si = 0;
+
+  const iv = setInterval(() => {
+    if (p < 70)      p += Math.random() * 6 + 2;
+    else if (p < 99) p += Math.random() * 1.5 + 0.3;
+    else {
+      clearInterval(iv);
+      bar.style.width = '99%'; pct.textContent = '99%';
+      status.textContent = T.loading.stuckMsg;
+      setTimeout(() => {
+        status.textContent = T.loading.jokeReveal;
+        setTimeout(() => {
+          screen.style.transition = 'opacity 0.5s';
+          screen.style.opacity = '0';
+          setTimeout(() => {
+            screen.style.display = 'none';
+            main.style.display = 'block';
+            initPage();
+          }, 500);
+        }, 1600);
+      }, 2200);
+      return;
+    }
+    if (p > 99) p = 99;
+    bar.style.width = p + '%';
+    pct.textContent = Math.floor(p) + '%';
+    while (si < steps.length && p >= steps[si][0]) {
+      status.textContent = steps[si][1]; si++;
+    }
+  }, 120);
+})();
+
+function initPage() {
+  initStars();
+  initBalloons();
+  initPotGame();
+  initPrankBtn();
+  initJokes();
+  initVirusToast();
+  setTimeout(() => confetti({ particleCount: 160, spread: 80, origin: { y: 0.35 } }), 600);
+  let ti = 0;
+  setInterval(() => { document.title = T.pageTitle[ti++ % T.pageTitle.length]; }, 3500);
+}
+
+function initStars() {
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  function resize() { c.width = innerWidth; c.height = innerHeight; }
+  resize(); addEventListener('resize', resize);
+  const stars = Array.from({ length: 220 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.8 + 0.4,
+    phase: Math.random() * Math.PI * 2,
+    speed: Math.random() * 0.6 + 0.2,
+  }));
+  (function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    const t = Date.now() / 1000;
+    stars.forEach(s => {
+      const a = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(s.phase + t * s.speed));
+      ctx.beginPath();
+      ctx.arc(s.x * c.width, s.y * c.height, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+function initBalloons() {
+  ['🎈','🎉','🎊','🎈','🎈'].forEach((e, i) => {
+    const b = document.createElement('div');
+    b.className = 'balloon'; b.textContent = e;
+    b.style.left = (8 + i * 20 + Math.random() * 6) + '%';
+    b.style.animationDuration = (12 + Math.random() * 8) + 's';
+    b.style.animationDelay   = (i * 3 + Math.random() * 4) + 's';
+    document.body.appendChild(b);
+  });
+}
+
+
+function initPotGame() {
+  const pot       = document.getElementById('pot');
+  const TOTAL     = T.game.totalHovers;
+  let hovered = 0, caught = false;
+
+  const dotsWrap = document.getElementById('faceit-dots');
+  const dots = [];
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('img');
+    d.className = 'faceit-dot';
+    d.src = T.game.levelIcons[i];
+    d.alt = `Level ${i}`;
+    d.width = 30; d.height = 30;
+    dotsWrap.appendChild(d);
+    dots.push(d);
+  }
+
+  function updateFaceit(level) {
+    const badge   = document.getElementById('faceit-badge');
+    const nameEl  = document.getElementById('faceit-name');
+    const hintEl  = document.getElementById('faceit-hint');
+    const colors  = T.game.levelColors;
+    const names   = T.game.levelNames;
+    const hints   = T.game.levelHints;
+    const color   = colors[level] || '#333';
+
+    badge.src = T.game.levelIcons[level];
+    badge.style.filter = level > 0
+      ? `drop-shadow(0 0 18px ${color}cc)`
+      : 'none';
+
+    nameEl.textContent = names[level];
+    nameEl.style.color = level > 0 ? color : '#888';
+
+    hintEl.innerHTML   = level === TOTAL
+      ? `<strong style="color:${color}">${hints[level]}</strong>`
+      : hints[level];
+
+    // Крапки-іконки
+    dots.forEach((d, i) => {
+      const lv = i + 1;
+      d.classList.remove('filled', 'current', 'pop');
+      if (lv < level) {
+        d.style.opacity = '1';
+        d.classList.add('filled');
+      } else if (lv === level) {
+        d.style.opacity = '1';
+        d.classList.add('filled', 'current', 'pop');
+        setTimeout(() => d.classList.remove('pop'), 450);
+      } else {
+        d.style.opacity = '0.2';
+      }
+    });
+  }
+
+  dots.forEach(d => d.style.opacity = '0.2');
+  updateFaceit(0);
+
+  // Каструля схована поки не натиснуто Старт
+  pot.style.display = 'none';
+
+  function randomPos() {
+    const pad = 110;
+    const pw = pot.offsetWidth  || 110;
+    const ph = pot.offsetHeight || 110;
+    return {
+      x: pad + Math.random() * (innerWidth  - pw - pad * 2),
+      y: pad + Math.random() * (innerHeight - ph - pad * 2),
+    };
+  }
+  function place(instant) {
+    const p = randomPos();
+    if (instant) {
+      pot.style.transition = 'none';
+      pot.style.left = p.x + 'px'; pot.style.top = p.y + 'px';
+      void pot.offsetWidth;
+      pot.style.transition = '';
+    } else {
+      pot.style.left = p.x + 'px'; pot.style.top = p.y + 'px';
+    }
+  }
+
+  // Кнопка Старт
+  const startBtn = document.getElementById('start-btn');
+  startBtn.addEventListener('click', () => {
+    startBtn.style.transition = 'opacity 0.4s, transform 0.4s';
+    startBtn.style.opacity = '0';
+    startBtn.style.transform = 'scale(0.8)';
+    setTimeout(() => startBtn.style.display = 'none', 400);
+    pot.style.display = 'block';
+    place(true);
+    // Скролимо до блоку з рівнем фасіка
+    setTimeout(() => {
+      const faceit = document.querySelector('.faceit-display');
+      if (faceit) faceit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 450);
+  });
+
+  pot.addEventListener('mouseenter', () => {
+    if (caught || hovered >= TOTAL) return;
+    hovered++;
+    updateFaceit(hovered);
+
+    if (hovered >= TOTAL) {
+      pot.classList.add('catchable');
+    } else {
+      place(false);
+      pot.style.animation = 'shake 0.25s ease';
+      setTimeout(() => pot.style.animation = '', 300);
+    }
+  });
+
+  pot.addEventListener('click', () => {
+    if (hovered < TOTAL || caught) return;
+    caught = true;
+    confetti({ particleCount: 350, spread: 120, origin: { y: 0.5 },
+      colors: ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff'] });
+    setTimeout(() => document.getElementById('gift-overlay').classList.add('open'), 700);
+  });
+}
+
+function initPrankBtn() {
+  const btn    = document.getElementById('prank-btn');
+  const reveal = document.getElementById('prank-reveal');
+  let tries = 0;
+  const positions = ['20%','65%','40%','75%','10%','55%','30%'];
+  btn.addEventListener('mouseenter', () => {
+    tries++;
+    if (tries > 6) { btn.style.display = 'none'; reveal.style.display = 'block'; return; }
+    btn.style.left = positions[tries % positions.length];
+    btn.style.transform = 'translateX(-50%)';
+  });
+}
+
+function initJokes() {
+  const jokes  = T.jokes;
+  const textEl = document.getElementById('joke-text');
+  const cntEl  = document.getElementById('joke-counter');
+  let idx = 0;
+
+  function show(i) {
+    textEl.style.opacity = '0';
+    setTimeout(() => {
+      textEl.innerHTML = jokes[i].replace(/\n/g, '<br>');
+      cntEl.textContent = `${i + 1} / ${jokes.length}`;
+      textEl.style.opacity = '1';
+    }, 200);
+  }
+
+  document.getElementById('joke-prev').addEventListener('click', () => {
+    idx = (idx - 1 + jokes.length) % jokes.length; show(idx);
+  });
+  document.getElementById('joke-next').addEventListener('click', () => {
+    idx = (idx + 1) % jokes.length; show(idx);
+  });
+
+  show(0);
+  setInterval(() => { idx = (idx + 1) % jokes.length; show(idx); }, 6000);
+}
+
+function initVirusToast() {
+  const toast = document.getElementById('virus-toast');
+  const msg   = document.getElementById('virus-msg');
+  setTimeout(() => {
+    toast.classList.add('show');
+    setTimeout(() => {
+      msg.textContent = T.virusToast.joke;
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }, 3000);
+  }, 5000);
+}
+</script>
+</body>
+</html>
